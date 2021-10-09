@@ -1,9 +1,21 @@
-Shader "Raymarch"
+Shader "Raymarching/Blob Runner"
 {
     Properties
     {
         _Smoothness ("Smoothness", Float) = 0.25
+        [MainColor] _BaseColor("Color", Color) = (1, 1, 1, 1)
+        _ShadowColor ("Shadow Color", Color) = (0.5, 0.5, 0.5, 1)
+        _RampStart ("Ramp Start", Range(0, 1)) = 0.5
+        _RampSmoothness ("Ramp Smoothness", Range(0, 5)) = 0.25 
         
+        _SpecularColor ("Specular Color", Color) = (1, 1, 1, 1)
+        _SpecularExponent ("Specular Exponent", float) = 20 
+        _SpecularRampStart ("Specular Ramp Start", Range(0, 1)) = 0.5
+        _SpecularRampSmoothness ("Specular Ramp Smoothness", Range(0, 5)) = 0.25
+        
+        _FresnelColor ("Fresnel Color", Color) = (1, 1, 1, 1)
+        _FresnelRampStart ("Fresnel Ramp Start", Range(0, 1)) = 0.5
+        _FresnelRampSmoothness ("Fresnel Ramp Smoothness", Range(0, 5)) = 0.25  
     }
     SubShader
     {
@@ -14,13 +26,12 @@ Shader "Raymarch"
         {
             Name "Forward"
             
-            CGPROGRAM
-// Upgrade NOTE: excluded shader from OpenGL ES 2.0 because it uses non-square matrices
-#pragma exclude_renderers gles
+            HLSLPROGRAM
+            
             #pragma vertex vert
             #pragma fragment frag
 
-            #include "UnityCG.cginc"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             #define MAX_STEPS 100
             #define MAX_DIST 100.
@@ -34,6 +45,7 @@ Shader "Raymarch"
 
             SEGMENT(_Head);
             SEGMENT(_Body);
+            SEGMENT(_Hips);
             
             SEGMENT(_RLeg1);
             SEGMENT(_LLeg1);
@@ -46,6 +58,21 @@ Shader "Raymarch"
             SEGMENT(_LArm2);
             
             float _Smoothness;
+
+            float3 _BaseColor;
+            float3 _ShadowColor;
+            float _RampStart;
+            float _RampSmoothness;
+
+            float3 _SpecularColor;
+            float _SpecularExponent;
+            float _SpecularRampStart;
+            float _SpecularRampSmoothness;
+
+            float3 _FresnelColor;
+            float _FresnelRampStart;
+            float _FresnelRampSmoothness;
+            
             CBUFFER_END
 
             struct appdata
@@ -63,9 +90,10 @@ Shader "Raymarch"
             v2f vert (const appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.ro = _WorldSpaceCameraPos;
-                o.hit_pos = mul(unity_ObjectToWorld, v.vertex);
+                const VertexPositionInputs vpi = GetVertexPositionInputs(v.vertex.xyz);
+                o.vertex = vpi.positionCS;
+                o.ro = GetCameraPositionWS();
+                o.hit_pos = vpi.positionWS;
                 return o;
             }
 
@@ -87,7 +115,7 @@ Shader "Raymarch"
                 return k0*(k0-1.0)/k1;
             }
 
-            float ellipsoid_sdf(float3 p, const float2x3 ellipsoid)
+            float ellipsoid_sdf(float3 p, const float3x3 ellipsoid)
             {
                 return ellipsoid_sdf(p, ellipsoid._m00_m01_m02, ellipsoid._m10_m11_m12);
             }
@@ -125,6 +153,13 @@ Shader "Raymarch"
             {
                 const float dist_body = SEGMENT_SDF(p, _Body);
                 float d = smooth_union_sdf(SEGMENT_SDF(p, _Head), dist_body, _Smoothness);
+                const float dist_hips = SEGMENT_SDF(p, _Hips);
+                d = min(d, smooth_union_sdf(dist_body, dist_hips, _Smoothness));
+
+                const float dist_hips_r_leg1 = smooth_union_sdf(dist_hips, SEGMENT_SDF(p, _RLeg1), _Smoothness);
+                d = min(d, dist_hips_r_leg1);
+                const float dist_hips_l_leg2 = smooth_union_sdf(dist_hips, SEGMENT_SDF(p, _LLeg1), _Smoothness);
+                d = min(d, dist_hips_l_leg2);
 
                 const float dist_body_r_leg1 = smooth_union_sdf(dist_body, SEGMENT_SDF(p, _RLeg1), _Smoothness);
                 d = min(d, dist_body_r_leg1);
@@ -172,13 +207,17 @@ Shader "Raymarch"
                 return normalize(n);
             }
 
-            fixed4 frag (const v2f i) : SV_Target
+            half get_ramp(float value, float start, float smoothness)
+            {
+                return smoothstep(start, start + smoothness, value);
+            }
+
+            half4 frag (const v2f i) : SV_Target
             {
                 const float3 ro = i.ro;
                 const float3 rd = normalize(i.hit_pos - ro);
 
                 const float d = ray_march(ro, rd);
-                fixed4 col = 0;
 
                 if (d >= MAX_DIST)
                 {
@@ -187,11 +226,30 @@ Shader "Raymarch"
 
                 const float3 p = ro + rd * d;
                 const float3 n = get_normal(p);
-                col.rgb = n;
+                const Light main_light = GetMainLight();
+                half diffuse = dot(main_light.direction, n);
+                diffuse = get_ramp((diffuse + 1.0) * 0.5, _RampStart, _RampSmoothness);
+                half3 col = lerp(_ShadowColor, _BaseColor, diffuse) *
+                    main_light.color;
 
-                return col;
+                const half3 view_direction_ws = SafeNormalize(GetCameraPositionWS() - p);
+                const half3 half_vector = normalize(view_direction_ws + main_light.direction);
+                float specular = dot(half_vector, n);
+                specular = get_ramp((specular + 1.0) * 0.5, _SpecularRampStart, _SpecularRampSmoothness);
+                specular = pow(specular, _SpecularExponent);
+                
+                col += specular * _SpecularColor * main_light.color;
+
+                half fresnel = 1 - saturate(dot(view_direction_ws, n));
+                fresnel = get_ramp(fresnel, _FresnelRampStart, _FresnelRampSmoothness);
+
+                col += fresnel * _FresnelColor * main_light.color;
+                
+                
+                return half4(saturate(col), 1);
             }
-            ENDCG
+            
+            ENDHLSL
         }
     }
 }
