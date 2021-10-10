@@ -87,16 +87,17 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EnvironmentReflections: 1
-    - _FogEnd: 20
+    - _FogEnd: 12
     - _FogStart: 5
+    - _FresnelHardness: 4.52
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _GrassElliposoidPower: 2
     - _GrassEllipsoidPower: 1.25
-    - _GrassFrequency: 2.46
+    - _GrassFrequency: 4
     - _GrassMaxHeight: 1.62
-    - _GrassTwistFactor: 1.59
+    - _GrassTwistFactor: 2.57
     - _GroundColorFade: 1.5
     - _Metallic: 0
     - _OcclusionStrength: 1
@@ -105,25 +106,28 @@ Material:
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
+    - _SpecularHardness: 2.48
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Surface: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _AnimationAmplitude: {r: 0.005, g: 1, b: 0.005, a: 0}
+    - _AnimationAmplitude: {r: 0.02, g: 1, b: 0.02, a: 0}
     - _AnimationDirection: {r: 1, g: 1, b: 0, a: 0}
     - _AnimationFrequency: {r: 1, g: 0, b: 0.5, a: 0}
     - _AnimationVelocity: {r: 1, g: 0, b: 1, a: 0}
     - _BaseColor: {r: 0.5068961, g: 1, b: 0.43867922, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FogColor: {r: 0.26513368, g: 0.6698113, b: 0.21168563, a: 1}
+    - _FogColor: {r: 0.34941176, g: 0.67058825, b: 0.21176471, a: 1}
+    - _FresnelColor: {r: 0.23823933, g: 0.3679245, b: 0.2204076, a: 1}
     - _GrassHeightNoiseScale: {r: 5, g: 5, b: 0, a: 0}
-    - _GrassSize: {r: 0.1, g: 1, b: 0.05, a: 0}
-    - _GroundColor: {r: 0.07610065, g: 0.41509432, b: 0, a: 1}
-    - _ShadowColor: {r: 0.029503385, g: 0.3679245, b: 0.029503385, a: 1}
+    - _GrassSize: {r: 0.07, g: 1, b: 0.02, a: 0}
+    - _GroundColor: {r: 0.22017519, g: 0.41568628, b: 0.07066667, a: 1}
+    - _ShadowColor: {r: 0.087581724, g: 0.36862746, b: 0.031372547, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _SpecularColor: {r: 0.3679245, g: 0.3679245, b: 0.3679245, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &397959542855315609
 MonoBehaviour:

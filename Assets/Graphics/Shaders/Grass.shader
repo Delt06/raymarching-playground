@@ -10,6 +10,8 @@
         _AnimationAmplitude ("Animation Amplitude", Vector) = (1, 1, 1, 0)
         _BaseColor ("Base Color", Color) = (0, 1, 0, 1)
         _ShadowColor ("Shadow Color", Color) = (0, 0.5, 0, 1)
+        _SpecularHardness ("Specular Hardness", Float) = 15
+        _SpecularColor ("Specular Color", Color) = (1, 1, 1, 1)
         _FogStart ("Fog Start", Float) = 25
         _FogEnd ("Fog End", Float) = 50
         _FogColor ("Fog Color", Color) = (1, 1, 1, 1)
@@ -39,6 +41,8 @@
             float3 _AnimationAmplitude;
             float3 _BaseColor;
             float3 _ShadowColor;
+            float _SpecularHardness;
+            float3 _SpecularColor;
             float _FogStart;
             float _FogEnd;
 
@@ -92,12 +96,20 @@
             half4 frag (varyings input) : SV_Target
             {
                 RAY_MARCH_DISCARD(input.ro, input.hit_pos);
-                float3 light_dir = -GetMainLight().direction;
-                float3 normal = get_normal(p);
-                half diffuse = dot(light_dir, normal);
+                const Light main_light = GetMainLight();
+                const float3 light_dir = -main_light.direction;
+                const float3 normal = get_normal(p);
+                const half diffuse = dot(light_dir, normal);
                 half3 col = lerp(_BaseColor, _ShadowColor, (diffuse + 1) * 0.5);
+
+                const half3 view_direction_ws = SafeNormalize(GetCameraPositionWS() - p);
+                const half3 h = normalize(light_dir + view_direction_ws);
+                const half n_dot_h = dot(normal, h);
+                col += _SpecularColor * pow(saturate(n_dot_h), _SpecularHardness) * main_light.color;
+                
                 col = lerp(_GroundColor, col, pow(saturate(p.y), _GroundColorFade));
                 col = lerp(col, _FogColor, smoothstep(_FogStart, _FogEnd, d));
+                
                 return half4(col, 1);
             }
             
