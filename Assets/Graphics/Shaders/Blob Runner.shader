@@ -29,7 +29,7 @@ Shader "Raymarching/Blob Runner"
             HLSLPROGRAM
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "./RaymarchSdf.hlsl"
+            #include "Assets/Graphics/ShaderLibrary/RaymarchSdf.hlsl"
 
             #define MAX_STEPS 100
             #define MAX_DIST 100.
@@ -73,7 +73,7 @@ Shader "Raymarching/Blob Runner"
             
             CBUFFER_END
 
-            #include "./RaymarchVert.hlsl"
+            #include "Assets/Graphics/ShaderLibrary/RaymarchVert.hlsl"
 
             #pragma vertex raymarch_vert
             #pragma fragment frag
@@ -111,7 +111,7 @@ Shader "Raymarching/Blob Runner"
             }
 
             #define GET_DIST get_dist
-            #include "./RaymarchCore.hlsl"
+            #include "Assets/Graphics/ShaderLibrary/RaymarchCore.hlsl"
 
             half get_ramp(float value, float start, float smoothness)
             {

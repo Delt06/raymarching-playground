@@ -8,6 +8,12 @@ float glsl_mod(const float x, const float y)
 #define GLSL_MOD(x, y) ((x) - (y) * floor((x) / (y)))
 #define REPEAT(x, y) GLSL_MOD((x) + (y) * 0.5, (y)) - (y) * 0.5
 
+float length_generic(float3 v, float p)
+{
+    v = pow(abs(v), p);
+    return pow(v.x + v.y + v.z, 1 / p);
+}
+
 float length2(float3 p)
 {
     p = p * p;
@@ -38,7 +44,7 @@ float ellipsoid_sdf(float3 p, const float3 o, const float3 r)
 {
     p -= o;
     const float k0 = length(p / r);
-    const float k1 = length(p / (r * r));
+    const float k1 = length((p / (r * r)));
     return k0 * (k0 - 1.0) / k1;
 }
 

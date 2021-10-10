@@ -15,6 +15,7 @@
         _FogColor ("Fog Color", Color) = (1, 1, 1, 1)
         _GroundColor ("Ground Color", Color) = (0, 0, 0, 1) 
         _GroundColorFade ("Ground Color Fade", Float) = 1
+        _GrassTwistFactor ("Grass Twist Factor", Float) = 0
     }
     SubShader
     {
@@ -45,16 +46,25 @@
             float3 _GroundColor;
             float _GroundColorFade;
             
+            float _GrassTwistFactor;
+            
             CBUFFER_END
 
-            #include "./RaymarchVert.hlsl"
-            #include "./RaymarchSdf.hlsl"
+            #include "Assets/Graphics/ShaderLibrary/RaymarchVert.hlsl"
+            #include "Assets/Graphics/ShaderLibrary/RaymarchSdf.hlsl"
             
             #pragma vertex raymarch_vert
             #pragma fragment frag
 
             #include "./GrassNoise.hlsl"
 
+            float3 rotate_y(in float3 p, const float t)
+            {
+                float co = cos(t);
+                float si = sin(t);
+                p.xz = mul(float2x2(co,-si,si,co), p.xz);
+                return p;
+            }
             
             float get_dist(float3 p)
             {
@@ -67,13 +77,17 @@
                 noise_uv *= _GrassHeightNoiseScale;
                 grass_size.y *= lerp(1, _GrassMaxHeight, noise(noise_uv));
                 const float normalized_height = p.y / _GrassMaxHeight;
-                const float grass_dist = ellipsoid_sdf(ep + sin(_Time.w * _AnimationFrequency) * normalized_height * _AnimationAmplitude, 0, grass_size); 
+                ep += sin(_Time.w * _AnimationFrequency) * normalized_height * _AnimationAmplitude;
+                ep = rotate_y(ep, ep.y * _GrassTwistFactor + noise_uv.x * noise_uv.y);
+                const float grass_dist = ellipsoid_sdf(ep, 0, grass_size); 
                 return union_sdf(plane_dist, grass_dist);
             }
 
             #define GET_DIST get_dist
-
-            #include "./RaymarchCore.hlsl"
+            #define MAX_STEPS 200
+            #define SURF_DISTANCE 1e-3
+            #define MAX_DIST 50
+            #include "Assets/Graphics/ShaderLibrary/RaymarchCore.hlsl"
             
             half4 frag (varyings input) : SV_Target
             {

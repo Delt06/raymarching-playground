@@ -87,13 +87,16 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EnvironmentReflections: 1
-    - _FogEnd: 15
+    - _FogEnd: 20
     - _FogStart: 5
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _GrassElliposoidPower: 2
+    - _GrassEllipsoidPower: 1.25
     - _GrassFrequency: 2.46
     - _GrassMaxHeight: 1.62
+    - _GrassTwistFactor: 1.59
     - _GroundColorFade: 1.5
     - _Metallic: 0
     - _OcclusionStrength: 1
@@ -108,7 +111,7 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _AnimationAmplitude: {r: 0.01, g: 1, b: 0.01, a: 0}
+    - _AnimationAmplitude: {r: 0.005, g: 1, b: 0.005, a: 0}
     - _AnimationDirection: {r: 1, g: 1, b: 0, a: 0}
     - _AnimationFrequency: {r: 1, g: 0, b: 0.5, a: 0}
     - _AnimationVelocity: {r: 1, g: 0, b: 1, a: 0}
@@ -117,7 +120,7 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogColor: {r: 0.26513368, g: 0.6698113, b: 0.21168563, a: 1}
     - _GrassHeightNoiseScale: {r: 5, g: 5, b: 0, a: 0}
-    - _GrassSize: {r: 0.1, g: 1, b: 0.1, a: 0}
+    - _GrassSize: {r: 0.1, g: 1, b: 0.05, a: 0}
     - _GroundColor: {r: 0.07610065, g: 0.41509432, b: 0, a: 1}
     - _ShadowColor: {r: 0.029503385, g: 0.3679245, b: 0.029503385, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
