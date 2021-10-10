@@ -1,5 +1,4 @@
-﻿#ifndef RAYMARCH_ATTRIBUTES
-#define RAYMARCH_ATTRIBUTES
+﻿#pragma once
 
 struct varyings
 {
@@ -7,5 +6,3 @@ struct varyings
     float3 ro : TEXCOORD0;
     float3 hit_pos : TEXCOORD1;
 };
-
-#endif

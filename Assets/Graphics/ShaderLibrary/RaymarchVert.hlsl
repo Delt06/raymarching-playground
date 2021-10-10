@@ -1,5 +1,4 @@
-﻿#ifndef RAYMARCH_VERT
-#define RAYMARCH_VERT
+﻿#pragma once
 
 #include "./RaymarchAttributes.hlsl"
 #include "./RaymarchVaryings.hlsl"
@@ -14,6 +13,3 @@ varyings raymarch_vert(const attributes input)
     o.hit_pos = vpi.positionWS;
     return o;
 }
-
-
-#endif

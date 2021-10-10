@@ -1,5 +1,4 @@
-﻿#ifndef RAYMARCH_CORE
-#define RAYMARCH_CORE
+﻿#pragma once
 
 #ifndef MAX_STEPS
 #define MAX_STEPS 100
@@ -10,7 +9,7 @@
 #endif
 
 #ifndef SURF_DISTANCE
-#define SURF_DISTANCE 1e-2
+#define SURF_DISTANCE 1e-3
 #endif
 
 #ifndef GET_DIST
@@ -52,4 +51,9 @@ float3 get_normal(const float3 p)
     return normalize(n);
 }
 
-#endif
+#define RAY_MARCH_DISCARD(ro, hit_pos) const float3 rd = normalize(hit_pos - ro); const float d = ray_march(ro, rd);\
+if (d >= MAX_DIST)\
+{\
+    discard;\
+}\
+const float3 p = ro + rd * d;

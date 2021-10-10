@@ -80,7 +80,7 @@ Shader "Raymarching/Blob Runner"
 
             #define SEGMENT_SDF(p, name) capsule_sdf(p, name##_a_r.xyz, name##_b, name##_a_r.w)
 
-            float get_dist(const float3 p)
+            float get_dist(float3 p)
             {
                 const float dist_body = SEGMENT_SDF(p, _Body);
                 const float dist_head = SEGMENT_SDF(p, _Head);
@@ -120,17 +120,8 @@ Shader "Raymarching/Blob Runner"
 
             half4 frag(const varyings input) : SV_Target
             {
-                const float3 ro = input.ro;
-                const float3 rd = normalize(input.hit_pos - ro);
-
-                const float d = ray_march(ro, rd);
-
-                if (d >= MAX_DIST)
-                {
-                    discard;
-                }
-
-                const float3 p = ro + rd * d;
+                RAY_MARCH_DISCARD(input.ro, input.hit_pos);
+                
                 const float3 n = get_normal(p);
                 const Light main_light = GetMainLight();
                 half diffuse = dot(main_light.direction, n);
