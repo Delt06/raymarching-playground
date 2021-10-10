@@ -1,8 +1,8 @@
-﻿# Raymarching Playground
+# Raymarching Playground
 
 A collection of shaders implemented with raymarching. 
 
-The shaders are compatible with Universal Rendering Pipeline.
+The shaders are compatible with Universal Render Pipeline.
 
 > Implemented with Unity 2020.3.16f1 and URP 10.5.1
 
