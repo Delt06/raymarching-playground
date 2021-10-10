@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 float glsl_mod(const float x, const float y)
 {

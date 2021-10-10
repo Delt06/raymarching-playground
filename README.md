@@ -1,4 +1,4 @@
-﻿# Raymarching Playground
+# Raymarching Playground
 
 A collection of shaders implemented with raymarching. 
 

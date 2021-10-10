@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #ifndef MAX_STEPS
 #define MAX_STEPS 100
