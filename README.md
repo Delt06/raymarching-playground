@@ -1,6 +1,6 @@
 # Raymarching Playground
 
-A collection of shaders implemented with raymarching. 
+A collection of Unity shaders implemented with raymarching. 
 
 The shaders are compatible with Universal Render Pipeline.
 
