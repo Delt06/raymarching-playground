@@ -132,7 +132,6 @@ Shader "Raymarching/Blob Runner"
             #define SEGMENT_SDF(p, name) capsule_sdf(p, name##_a_r.xyz, name##_b, name##_a_r.w)
 
             //https://timcoster.com/2020/02/13/raymarching-shader-pt3-smooth-blending-operators/
-
             float smooth_intersect_sdf(const float dist_a, const float dist_b, const float k) 
             {
               const float h = clamp(0.5 - 0.5*(dist_a-dist_b)/k, 0., 1.);
@@ -152,30 +151,29 @@ Shader "Raymarching/Blob Runner"
             float get_dist(const float3 p)
             {
                 const float dist_body = SEGMENT_SDF(p, _Body);
-                float d = smooth_union_sdf(SEGMENT_SDF(p, _Head), dist_body, _Smoothness);
+                const float dist_head = SEGMENT_SDF(p, _Head);
+                float d = smooth_union_sdf(dist_head, dist_body, _Smoothness);
                 const float dist_hips = SEGMENT_SDF(p, _Hips);
                 d = min(d, smooth_union_sdf(dist_body, dist_hips, _Smoothness));
 
-                const float dist_hips_r_leg1 = smooth_union_sdf(dist_hips, SEGMENT_SDF(p, _RLeg1), _Smoothness);
-                d = min(d, dist_hips_r_leg1);
-                const float dist_hips_l_leg2 = smooth_union_sdf(dist_hips, SEGMENT_SDF(p, _LLeg1), _Smoothness);
-                d = min(d, dist_hips_l_leg2);
+                d = min(d, smooth_union_sdf(dist_hips, SEGMENT_SDF(p, _RLeg1), _Smoothness));
+                d = min(d, smooth_union_sdf(dist_hips, SEGMENT_SDF(p, _LLeg1), _Smoothness));
 
-                const float dist_body_r_leg1 = smooth_union_sdf(dist_body, SEGMENT_SDF(p, _RLeg1), _Smoothness);
-                d = min(d, dist_body_r_leg1);
-                const float dist_body_l_leg2 = smooth_union_sdf(dist_body, SEGMENT_SDF(p, _LLeg1), _Smoothness);
-                d = min(d, dist_body_l_leg2);
+                d = min(d, smooth_union_sdf(dist_body, SEGMENT_SDF(p, _RLeg1), _Smoothness));
+                d = min(d, smooth_union_sdf(dist_body, SEGMENT_SDF(p, _LLeg1), _Smoothness));
 
-                d = min(d, smooth_union_sdf(dist_body_r_leg1, SEGMENT_SDF(p, _RLeg2), _Smoothness));
-                d = min(d, smooth_union_sdf(dist_body_l_leg2, SEGMENT_SDF(p, _LLeg2), _Smoothness));
+                d = min(d, smooth_union_sdf(SEGMENT_SDF(p, _RLeg1), SEGMENT_SDF(p, _RLeg2), _Smoothness));
+                d = min(d, smooth_union_sdf(SEGMENT_SDF(p, _LLeg1), SEGMENT_SDF(p, _LLeg2), _Smoothness));
 
-                const float dist_body_r_arm1 = smooth_union_sdf(dist_body, SEGMENT_SDF(p, _RArm1), _Smoothness);
+                float dist_body_r_arm1 = smooth_union_sdf(dist_body, SEGMENT_SDF(p, _RArm1), _Smoothness);
+                dist_body_r_arm1 = smooth_union_sdf(dist_head, dist_body_r_arm1, _Smoothness);
                 d = min(d, dist_body_r_arm1);
-                const float dist_body_l_arm2 = smooth_union_sdf(dist_body, SEGMENT_SDF(p, _LArm1), _Smoothness);
-                d = min(d, dist_body_l_arm2);
+                float dist_body_l_arm1 = smooth_union_sdf(dist_body, SEGMENT_SDF(p, _LArm1), _Smoothness);
+                dist_body_l_arm1 = smooth_union_sdf(dist_head, dist_body_l_arm1, _Smoothness);
+                d = min(d, dist_body_l_arm1);
 
                 d = min(d, smooth_union_sdf(dist_body_r_arm1, SEGMENT_SDF(p, _RArm2), _Smoothness));
-                d = min(d, smooth_union_sdf(dist_body_l_arm2, SEGMENT_SDF(p, _LArm2), _Smoothness));
+                d = min(d, smooth_union_sdf(dist_body_l_arm1, SEGMENT_SDF(p, _LArm2), _Smoothness));
                 
                 return d;
             }
@@ -233,9 +231,9 @@ Shader "Raymarching/Blob Runner"
                     main_light.color;
 
                 const half3 view_direction_ws = SafeNormalize(GetCameraPositionWS() - p);
-                const half3 half_vector = normalize(view_direction_ws + main_light.direction);
-                float specular = dot(half_vector, n);
-                specular = get_ramp((specular + 1.0) * 0.5, _SpecularRampStart, _SpecularRampSmoothness);
+                const half3 half_vector = 2 * dot(main_light.direction, n) * n - main_light.direction;
+                float specular = max(0, dot(half_vector, n));
+                specular = get_ramp(specular, _SpecularRampStart, _SpecularRampSmoothness);
                 specular = pow(specular, _SpecularExponent);
                 
                 col += specular * _SpecularColor * main_light.color;
