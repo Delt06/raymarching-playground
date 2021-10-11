@@ -53,6 +53,12 @@ float ellipsoid_sdf(float3 p, const float3x3 ellipsoid)
     return ellipsoid_sdf(p, ellipsoid._m00_m01_m02, ellipsoid._m10_m11_m12);
 }
 
+float box_sdf(float3 p, float3 b)
+{
+    float3 q = abs(p) - b;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+
 // https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
 
 float union_sdf(const float d1, const float d2) { return min(d1, d2); }
