@@ -17,3 +17,9 @@ Effect similar to the one in [Blob Runner 3D](https://play.google.com/store/apps
 ### Grass
 
 ![Grass](Documentation/grass.gif)
+
+### Lighting
+
+Advanced lighting (shadows, reflections) example.
+
+![Lighting](Documentation/lighting.gif)
