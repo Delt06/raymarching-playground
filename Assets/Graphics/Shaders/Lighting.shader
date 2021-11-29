@@ -44,25 +44,25 @@ Shader "Raymarching/Lighting"
             #define GET_DIST get_dist
             #include "Assets/Graphics/ShaderLibrary/RaymarchCore.hlsl"
 
-            float get_light(float3 p)
+            float get_light(const float3 p)
             {
-                Light light = GetMainLight();
-                float3 l = light.direction;
-                float3 n = get_normal(p);
+                const Light light = GetMainLight();
+                const float3 l = light.direction;
+                const float3 n = get_normal(p);
 
                 float dif = max(0, dot(n, l));
-                float d = ray_march(p + n * SURF_DISTANCE * 2, l);
+                const float d = ray_march(p + n * SURF_DISTANCE * 2, l);
                 if (d < MAX_DIST)
                     dif *= .7;
                 return dif;
             }
 
-            float get_metallic(float3 p)
+            float get_metallic(const float3 p)
             {
                 return step(0.001, floor_dist(p)) * 0.5;
             }
 
-            float3 get_color(float3 p, float3 ro)
+            float3 get_color(const float3 p, const float3 ro)
             {
                 float3 col = lerp(float3(0.5, 1, 0.25), float3(1, 1, 1), step(0.001, floor_dist(p)));
                 col *= 1 - get_metallic(p);
@@ -84,14 +84,14 @@ Shader "Raymarching/Lighting"
                     [unroll]
                     for (int i = 0; i < REFLECTION_BOUNCES; i++)
                     {
-                        float3 normal = get_normal(p);
+                        const float3 normal = get_normal(p);
                         rd = reflect(rd, normal);
                         ro = p + normal * SURF_DISTANCE * 2;
-                        float d = ray_march(ro, rd);
+                        const float d = ray_march(ro, rd);
                         
 
                         p = ro + rd * d;
-                        float3 reflection_color = get_color(p, ro);
+                        const float3 reflection_color = get_color(p, ro);
                         
                         col += metallic * reflection_color;
                         if (d >= MAX_DIST)
