@@ -31,9 +31,9 @@ Shader "Raymarching/Blob Runner"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Assets/Graphics/ShaderLibrary/RaymarchSdf.hlsl"
 
-            #define MAX_STEPS 100
-            #define MAX_DIST 100.
-            #define SURF_DISTANCE 1e-2
+            #define MAX_STEPS 25
+            #define MAX_DIST 3.
+            #define SURF_DISTANCE 2e-2
 
             #define SEGMENT(name) float4 name##_a_r; \
                                   float3 name##_b;
@@ -118,7 +118,13 @@ Shader "Raymarching/Blob Runner"
                 return smoothstep(start, start + smoothness, value);
             }
 
-            half4 frag(const varyings input) : SV_Target
+            inline float compute_depth(const float3 position_ws)
+            {
+                float4 position_cs = TransformWorldToHClip(position_ws);
+                return position_cs.z / position_cs.w;
+            }
+
+            void frag(const varyings input, out half4 frag_color : SV_Target, out float depth : SV_Depth)
             {
                 RAY_MARCH_DISCARD(input.ro, input.hit_pos);
                 
@@ -142,8 +148,9 @@ Shader "Raymarching/Blob Runner"
 
                 col += fresnel * _FresnelColor * main_light.color;
                 
-                
-                return half4(saturate(col), 1);
+
+                frag_color = half4(saturate(col), 1);
+                depth = compute_depth(p);
             }
             
             ENDHLSL
